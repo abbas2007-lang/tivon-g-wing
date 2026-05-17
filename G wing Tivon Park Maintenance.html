@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tivon Park - G Wing Maintenance</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        .brand-purple { color: #78246c; }
+        .bg-brand-purple { background-color: #78246c; }
+        .bg-brand-green { background-color: #8cb83b; }
+        .border-brand-purple { border-color: #78246c; }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans min-h-screen">
+
+    <div id="loginScreen" class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full text-center border-t-4 border-brand-purple">
+            <div class="flex justify-center mb-4">
+                <div class="flex items-center space-x-3 text-left">
+                    <span class="text-4xl">🌳</span>
+                    <div>
+                        <h1 class="text-2xl font-black tracking-wider brand-purple leading-none">TIVON<br>PARK</h1>
+                        <p class="text-xs font-semibold text-gray-500 italic">Breathe Green</p>
+                    </div>
+                </div>
+            </div>
+            <h2 class="text-lg font-bold text-gray-700 mb-6">G-Wing Maintenance System</h2>
+            <input type="password" id="passwordInput" placeholder="Enter Manager Password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#78246c] mb-4 text-center">
+            <button onclick="checkPassword()" class="w-full bg-brand-purple text-white py-2 rounded-lg font-semibold hover:bg-opacity-90 transition">Login</button>
+            <p id="loginError" class="text-red-500 text-sm mt-2 hidden">Invalid Password. Try again.</p>
+        </div>
+    </div>
+
+    <div id="mainApp" class="hidden">
+        <header class="bg-white shadow-sm border-b px-4 py-3 sticky top-0 z-10">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl">🌳</span>
+                    <div>
+                        <h1 class="text-xl font-black brand-purple tracking-wide leading-none">TIVON PARK</h1>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">G-Wing Admin</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <select id="monthSelect" onchange="changeMonth()" class="bg-gray-100 border rounded-lg px-3 py-1.5 font-semibold text-gray-700 focus:outline-none">
+                        <option value="January 2026">January 2026</option>
+                        <option value="February 2026">February 2026</option>
+                        <option value="March 2026">March 2026</option>
+                        <option value="April 2026">April 2026</option>
+                        <option value="May 2026" selected>May 2026</option>
+                        <option value="June 2026">June 2026</option>
+                        <option value="July 2026">July 2026</option>
+                        <option value="August 2026">August 2026</option>
+                        <option value="September 2026">September 2026</option>
+                        <option value="October 2026">October 2026</option>
+                        <option value="November 2026">November 2026</option>
+                        <option value="December 2026">December 2026</option>
+                    </select>
+                    <button onclick="logout()" class="text-gray-400 hover:text-red-500 text-sm">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto p-4 space-y-6">
+            
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-xl shadow-xs border-l-4 border-brand-purple">
+                    <p class="text-xs font-bold text-gray-400 uppercase">Total Collected (<span class="currentMonthLabel">May 2026</span>)</p>
+                    <p class="text-2xl font-bold brand-purple mt-1">INR <span id="totalCollected">0</span></p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-xs border-l-4 border-brand-green">
+                    <p class="text-xs font-bold text-gray-400 uppercase">Collection Progress</p>
+                    <p class="text-2xl font-bold text-gray-700 mt-1"><span id="paidCount">0</span> / 36 <span class="text-sm font-normal text-gray-400">Flats</span></p>
+                </div>
+                <div class="bg-white p-4 rounded-xl shadow-xs border-l-4 border-amber-500">
+                    <p class="text-xs font-bold text-gray-400 uppercase">Pending Outstanding</p>
+                    <p class="text-2xl font-bold text-amber-600 mt-1">INR <span id="totalPending">0</span></p>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-xl shadow-xs border">
+                <h3 class="font-bold text-gray-700 mb-2 flex items-center gap-2">⚙️ Rate Reference Profile (BHK Rules)</h3>
+                <div class="grid grid-cols-3 gap-2 text-xs md:text-sm text-center">
+                    <div class="p-2 bg-purple-50 rounded text-purple-900 border border-purple-100"><strong>1 BHK:</strong> INR 2,950 <span class="block text-[10px] text-purple-600">(03 Series)</span></div>
+                    <div class="p-2 bg-green-50 rounded text-green-900 border border-green-100"><strong>2 BHK:</strong> INR 4,800 <span class="block text-[10px] text-green-600">(02, 04 Series & G01)</span></div>
+                    <div class="p-2 bg-blue-50 rounded text-blue-900 border border-blue-100"><strong>3 BHK:</strong> INR 5,980 <span class="block text-[10px] text-blue-600">(01 Series)</span></div>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <h2 class="text-lg font-bold text-gray-800">Flat Management Matrix (<span class="currentMonthLabel">May 2026</span>)</h2>
+                
+                <div id="floorsContainer" class="space-y-3">
+                    </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-xs border p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-gray-800">📋 Comprehensive Transaction Log Ledger</h3>
+                    <button onclick="window.print()" class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-md font-medium hover:bg-black transition">🖨️ Print Report</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-500">
+                        <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
+                            <tr>
+                                <th class="p-3">Flat No</th>
+                                <th class="p-3">Config Type</th>
+                                <th class="p-3">Selected Month</th>
+                                <th class="p-3">Assigned Rate</th>
+                                <th class="p-3">Payment Status</th>
+                                <th class="p-3">Action History Logs</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reportTableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Set your master app access credentials here
+        const APP_PASSWORD = "G123"; 
+        
+        // Optional: Replace this URL string with your published Google Apps Script Web App URL macro to enable full cloud backup pipelines!
+        const GOOGLE_SCRIPT_URL = "";
+
+        // Application State Database Object Storage
+        let currentMonth = "May 2026";
+        let records = JSON.parse(localStorage.getItem('tivon_park_records')) || {};
+
+        // Flat definitions mapping matching user layout rulesets
+        const seriesConfig = {
+            '01': { bhk: '3 BHK', rate: 5980 },
+            '02': { bhk: '2 BHK', rate: 4800 },
+            '03': { bhk: '1 BHK', rate: 2950 },
+            '04': { bhk: '2 BHK', rate: 4800 }
+        };
+
+        const floors = ['G', '1', '2', '3', '4', '5', '6', '7', '8'];
+        const sequences = ['01', '02', '03', '04'];
+
+        function getFlatDetails(flatId) {
+            // Exceptional catch checking condition rule: G01 is uniquely structured as 2BHK
+            if (flatId === 'G01') {
+                return { bhk: '2 BHK', rate: 4800 };
+            }
+            const series = flatId.slice(-2);
+            return seriesConfig[series];
+        }
+
+        function checkPassword() {
+            const pass = document.getElementById('passwordInput').value;
+            if (pass === APP_PASSWORD) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                initApp();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        function logout() {
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginError').classList.add('hidden');
+        }
+
+        function initApp() {
+            updateLabels();
+            renderGrids();
+            calculateMetrics();
+        }
+
+        function updateLabels() {
+            document.querySelectorAll('.currentMonthLabel').forEach(el => el.innerText = currentMonth);
+        }
+
+        function changeMonth() {
+            currentMonth = document.getElementById('monthSelect').value;
+            initApp();
+        }
+
+        function renderGrids() {
+            const container = document.getElementById('floorsContainer');
+            container.innerHTML = '';
+
+            floors.forEach(floor => {
+                const floorDiv = document.createElement('div');
+                floorDiv.className = "bg-white p-4 rounded-xl border flex flex-col md:flex-row md:items-center gap-4 shadow-2xs";
+                
+                const floorLabel = document.createElement('div');
+                floorLabel.className = "w-24 font-black brand-purple text-base border-b md:border-b-0 md:border-r pb-2 md:pb-0 border-gray-200 uppercase tracking-wider";
+                floorLabel.innerText = floor === 'G' ? "Ground" : `Floor ${floor}`;
+                floorDiv.appendChild(floorLabel);
+
+                const gridDiv = document.createElement('div');
+                gridDiv.className = "grid grid-cols-2 sm:grid-cols-4 gap-3 flex-1";
+
+                sequences.forEach(seq => {
+                    const flatId = `${floor}${seq}`;
+                    const info = getFlatDetails(flatId);
+                    const isPaid = records[currentMonth]?.[flatId] || false;
+
+                    const btn = document.createElement('button');
+                    btn.id = `btn-${flatId}`;
+                    btn.onclick = () => togglePayment(flatId, info.rate);
+                    
+                    if (isPaid) {
+                        btn.className = "p-3 rounded-lg text-left bg-green-500 text-white shadow-xs transition duration-200 flex flex-col justify-between h-20 border border-green-600";
+                        btn.innerHTML = `<div><span class="font-black text-lg">${flatId}</span> <span class="text-[10px] bg-white text-green-600 px-1.5 rounded-full font-bold ml-1">${info.bhk}</span></div><div class="text-xs font-semibold tracking-wider flex items-center justify-between w-full"><span>₹${info.rate}</span> <span class="bg-white/20 px-2 py-0.5 rounded text-[10px]">✓ PAID</span></div>`;
+                    } else {
+                        btn.className = "p-3 rounded-lg text-left bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 transition duration-200 flex flex-col justify-between h-20 shadow-2xs";
+                        btn.innerHTML = `<div><span class="font-black text-lg text-gray-800">${flatId}</span> <span class="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-semibold ml-1">${info.bhk}</span></div><div class="text-xs font-bold text-gray-500 tracking-wider flex items-center justify-between w-full"><span>₹${info.rate}</span> <span class="text-red-500 text-[10px]">● UNPAID</span></div>`;
+                    }
+
+                    gridDiv.appendChild(btn);
+                });
+
+                floorDiv.appendChild(gridDiv);
+                container.appendChild(floorDiv);
+            });
+        }
+
+        function togglePayment(flatId, rate) {
+            if (!records[currentMonth]) {
+                records[currentMonth] = {};
+            }
+
+            const currentStatus = records[currentMonth][flatId];
+            const newStatus = !currentStatus;
+            
+            records[currentMonth][flatId] = newStatus;
+            localStorage.setItem('tivon_park_records', JSON.stringify(records));
+            
+            initApp();
+
+            // Cloud Data Transmission Hub Pipeline Execution
+            if (newStatus && GOOGLE_SCRIPT_URL !== "") {
+                sendToGoogleSheets(flatId, rate, "PAID");
+            }
+        }
+
+        function calculateMetrics() {
+            let totalCollected = 0;
+            let totalPending = 0;
+            let paidCount = 0;
+            const tableBody = document.getElementById('reportTableBody');
+            tableBody.innerHTML = '';
+
+            floors.forEach(floor => {
+                sequences.forEach(seq => {
+                    const flatId = `${floor}${seq}`;
+                    const info = getFlatDetails(flatId);
+                    const isPaid = records[currentMonth]?.[flatId] || false;
+
+                    if (isPaid) {
+                        totalCollected += info.rate;
+                        paidCount++;
+                    } else {
+                        totalPending += info.rate;
+                    }
+
+                    // Render rows into tabular display engine ledger
+                    const row = document.createElement('tr');
+                    row.className = "border-b hover:bg-gray-50";
+                    row.innerHTML = `
+                        <td class="p-3 font-bold text-gray-900">${flatId}</td>
+                        <td class="p-3 text-xs"><span class="px-2 py-1 rounded bg-gray-100 font-medium">${info.bhk}</span></td>
+                        <td class="p-3 text-xs font-semibold">${currentMonth}</td>
+                        <td class="p-3 font-mono font-medium text-gray-700">INR ${info.rate}</td>
+                        <td class="p-3 text-xs font-bold">
+                            <span class="${isPaid ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'} px-2 py-1 rounded-full">
+                                ${isPaid ? 'Received' : 'Pending Payment'}
+                            </span>
+                        </td>
+                        <td class="p-3">
+                            <button onclick="togglePayment('${flatId}', ${info.rate})" class="text-xs font-bold brand-purple hover:underline decoration-brand-purple">
+                                Flip State
+                            </button>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            });
+
+            document.getElementById('totalCollected').innerText = totalCollected.toLocaleString('en-IN');
+            document.getElementById('paidCount').innerText = paidCount;
+            document.getElementById('totalPending').innerText = totalPending.toLocaleString('en-IN');
+        }
+
+        function sendToGoogleSheets(flat, amount, status) {
+            const payload = {
+                timestamp: new Date().toISOString(),
+                month: currentMonth,
+                flatNumber: flat,
+                amountCollected: amount,
+                paymentStatus: status
+            };
+
+            // Non-blocking fetch deployment targeting remote script endpoint handling transaction parsing
+            fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).catch(err => console.log("Cloud push deferred or offline: ", err));
+        }
+    </script>
+</body>
+</html>
