@@ -48,10 +48,10 @@
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest" id="roleBadge">G-Wing Dashboard</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <button onclick="fetchMasterRecords()" class="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition" id="syncBtn">🔄 Sync Cloud Data</button>
+                <div class="flex items-center space-x-2">
+                    <button onclick="fetchMasterRecords()" class="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition" id="syncBtn">🔄 Sync Cloud</button>
                     
-                    <select id="monthSelect" onchange="changeMonth()" class="bg-gray-100 border rounded-lg px-2.5 py-1.5 font-semibold text-gray-700 focus:outline-none text-sm">
+                    <select id="monthSelect" onchange="changeMonth()" class="bg-gray-100 border rounded-lg px-2 py-1.5 font-semibold text-gray-700 focus:outline-none text-xs">
                         <option value="January 2026">January 2026</option>
                         <option value="February 2026">February 2026</option>
                         <option value="March 2026">March 2026</option>
@@ -65,7 +65,7 @@
                         <option value="November 2026">November 2026</option>
                         <option value="December 2026">December 2026</option>
                     </select>
-                    <button onclick="exitToGateway()" class="text-gray-400 hover:text-red-500 text-sm font-medium pl-1">Exit</button>
+                    <button onclick="exitToGateway()" class="text-gray-400 hover:text-red-500 text-xs font-medium pl-1">Exit</button>
                 </div>
             </div>
         </header>
@@ -91,6 +91,10 @@
                 </div>
             </div>
 
+            <div class="text-right">
+               <button onclick="clearSystemMemory()" class="text-[10px] text-red-400 underline hover:text-red-600">⚠️ Clear Local Device Cache & Memory Reset</button>
+            </div>
+
             <div class="bg-white p-4 rounded-xl shadow-xs border">
                 <h3 class="font-bold text-gray-700 mb-2 flex items-center gap-2 text-sm">⚙️ Rate Reference Profile (BHK Rules)</h3>
                 <div class="grid grid-cols-3 gap-2 text-xs text-center">
@@ -103,7 +107,10 @@
             <div class="space-y-4">
                 <div class="flex justify-between items-center">
                     <h2 class="text-lg font-bold text-gray-800">Flat Status Map (<span class="currentMonthLabel">May 2026</span>)</h2>
-                    <span id="lockNotice" class="text-xs font-bold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md border border-amber-200 hidden">🔒 Read-Only Mode Active</span>
+                    <div class="flex gap-2">
+                        <button id="manualUnlockBtn" onclick="forceAdminUnlock()" class="text-xs bg-purple-100 text-purple-700 font-bold px-2 py-1 rounded hidden border border-purple-300">🔓 Force Unlock Buttons</button>
+                        <span id="lockNotice" class="text-xs font-bold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md border border-amber-200 hidden">🔒 Read-Only Mode Active</span>
+                    </div>
                 </div>
                 <div id="floorsContainer" class="space-y-3">
                     </div>
@@ -171,13 +178,13 @@
     <script>
         const APP_PASSWORD = "G123"; 
         
-        // PASTE YOUR FRESH DEPLOYED WEB APP URL HERE:
+        // PASTE YOUR GOOGLE WEB APP MACRO ENDPOINT LINK URL DIRECTLY BETWEEN THE QUOTES BELOW:
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzj48ODAOj0dRsdrqqaV5-q2VfLs2HEWUAQFwiTKD_2vXU6aTdwi8pixRndtt07dXcjQ/exec";
 
         let currentMonth = "May 2026";
         let isAdmin = false;
 
-        let records = JSON.parse(localStorage.getItem('tivon_park_records')) || {};
+        let records = {};
         let expenses = JSON.parse(localStorage.getItem('tivon_park_expenses')) || [];
 
         const seriesConfig = {
@@ -202,6 +209,7 @@
             document.getElementById('roleBadge').innerText = "G-Wing Member View Only";
             document.getElementById('lockNotice').classList.remove('hidden');
             document.getElementById('expensesBlock').classList.add('hidden');
+            document.getElementById('manualUnlockBtn').classList.add('hidden');
             fetchMasterRecords();
         }
 
@@ -214,10 +222,27 @@
                 document.getElementById('roleBadge').innerText = "G-Wing System Administrator";
                 document.getElementById('lockNotice').classList.add('hidden');
                 document.getElementById('expensesBlock').classList.remove('hidden');
+                document.getElementById('manualUnlockBtn').classList.remove('hidden');
                 document.querySelectorAll('.adminOnly').forEach(el => el.classList.remove('invisible'));
                 fetchMasterRecords();
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+
+        // BACKUP FUNCTION FOR SMARTPHONES TO FORCE UNLOCK INPUT CAPABILITIES IF CACHE IS STUCK
+        function forceAdminUnlock() {
+            isAdmin = true;
+            alert("Admin input controls forced active!");
+            renderGrids();
+            calculateMetrics();
+        }
+
+        function clearSystemMemory() {
+            if(confirm("This will clean up your local phone browser history for this app to fix alignment issues. Proceed?")) {
+                localStorage.clear();
+                alert("Memory wiped. Reloading application...");
+                window.location.reload();
             }
         }
 
@@ -239,16 +264,15 @@
                         if (!records[row.month]) records[row.month] = {};
                         records[row.month][row.flatNumber] = (row.status === "PAID");
                     });
-                    localStorage.setItem('tivon_park_records', JSON.stringify(records));
                     initApp();
-                    btn.innerText = "✅ Cloud Synced";
-                    setTimeout(() => { btn.innerText = "🔄 Sync Cloud Data"; btn.disabled = false; }, 2000);
+                    btn.innerText = "✅ Synced";
+                    setTimeout(() => { btn.innerText = "🔄 Sync Cloud"; btn.disabled = false; }, 2000);
                 })
                 .catch(err => {
                     console.log("Error loading remote sheet matrix: ", err);
                     initApp();
-                    btn.innerText = "❌ Sync Failed";
-                    setTimeout(() => { btn.innerText = "🔄 Sync Cloud Data"; btn.disabled = false; }, 2000);
+                    btn.innerText = "❌ Failed";
+                    setTimeout(() => { btn.innerText = "🔄 Sync Cloud"; btn.disabled = false; }, 2000);
                 });
         }
 
@@ -299,11 +323,10 @@
                     const btn = document.createElement('button');
                     btn.id = `btn-${flatId}`;
                     
+                    // Allow input if administrator credentials match
                     if (isAdmin) {
                         btn.onclick = () => togglePayment(flatId, info.rate);
                         btn.style.cursor = "pointer";
-                    } else {
-                        btn.style.cursor = "not-allowed";
                     }
                     
                     if (isPaid) {
@@ -329,7 +352,6 @@
             const newStatus = !currentStatus;
             
             records[currentMonth][flatId] = newStatus;
-            localStorage.setItem('tivon_park_records', JSON.stringify(records));
             
             initApp();
 
