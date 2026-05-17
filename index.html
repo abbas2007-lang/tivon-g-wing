@@ -108,7 +108,7 @@
                 <div class="flex justify-between items-center">
                     <h2 class="text-lg font-bold text-gray-800">Flat Status Map (<span class="currentMonthLabel">May 2026</span>)</h2>
                     <div class="flex gap-2">
-                        <button id="manualUnlockBtn" onclick="forceAdminUnlock()" class="text-xs bg-purple-100 text-purple-700 font-bold px-2 py-1 rounded hidden border border-purple-300">🔓 Force Unlock Buttons</button>
+                        <button id="manualUnlockBtn" onclick="forceAdminUnlock()" class="text-xs bg-purple-100 text-purple-700 font-bold px-2 py-1 rounded hidden border border-purple-300"> 🔓 Force Unlock Buttons</button>
                         <span id="lockNotice" class="text-xs font-bold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md border border-amber-200 hidden">🔒 Read-Only Mode Active</span>
                     </div>
                 </div>
@@ -178,7 +178,7 @@
     <script>
         const APP_PASSWORD = "G123"; 
         
-        // PASTE YOUR GOOGLE WEB APP MACRO ENDPOINT LINK URL DIRECTLY BETWEEN THE QUOTES BELOW:
+        // PASTE YOUR NEW DEPLOYED GOOGLE URL ENDPOINT DIRECTLY HERE:
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzXJm4G6slDEPPaMLTM_qFX2A-F4hrQg2Jv9wp6j9ttnBVaOzH_E9HtfqDe5bHwlIpNyA/exec";
 
         let currentMonth = "May 2026";
@@ -230,7 +230,6 @@
             }
         }
 
-        // BACKUP FUNCTION FOR SMARTPHONES TO FORCE UNLOCK INPUT CAPABILITIES IF CACHE IS STUCK
         function forceAdminUnlock() {
             isAdmin = true;
             alert("Admin input controls forced active!");
@@ -239,9 +238,8 @@
         }
 
         function clearSystemMemory() {
-            if(confirm("This will clean up your local phone browser history for this app to fix alignment issues. Proceed?")) {
+            if(confirm("Clear local cache history?")) {
                 localStorage.clear();
-                alert("Memory wiped. Reloading application...");
                 window.location.reload();
             }
         }
@@ -260,6 +258,7 @@
                 .then(response => response.json())
                 .then(cloudData => {
                     records = {};
+                    // Reads top to bottom, making sure the newest lines win cleanly
                     cloudData.forEach(row => {
                         if (!records[row.month]) records[row.month] = {};
                         records[row.month][row.flatNumber] = (row.status === "PAID");
@@ -269,7 +268,6 @@
                     setTimeout(() => { btn.innerText = "🔄 Sync Cloud"; btn.disabled = false; }, 2000);
                 })
                 .catch(err => {
-                    console.log("Error loading remote sheet matrix: ", err);
                     initApp();
                     btn.innerText = "❌ Failed";
                     setTimeout(() => { btn.innerText = "🔄 Sync Cloud"; btn.disabled = false; }, 2000);
@@ -323,7 +321,6 @@
                     const btn = document.createElement('button');
                     btn.id = `btn-${flatId}`;
                     
-                    // Allow input if administrator credentials match
                     if (isAdmin) {
                         btn.onclick = () => togglePayment(flatId, info.rate);
                         btn.style.cursor = "pointer";
@@ -351,12 +348,12 @@
             const currentStatus = records[currentMonth][flatId];
             const newStatus = !currentStatus;
             
+            // Persist locally instantly so network delays can't "deselect" it
             records[currentMonth][flatId] = newStatus;
-            
             initApp();
 
-            if (newStatus && GOOGLE_SCRIPT_URL !== "") {
-                sendToGoogleSheets(flatId, rate, "PAID");
+            if (GOOGLE_SCRIPT_URL !== "") {
+                sendToGoogleSheets(flatId, rate, newStatus ? "PAID" : "UNPAID");
             }
         }
 
@@ -369,6 +366,7 @@
             const tableBody = document.getElementById('reportTableBody');
             tableBody.innerHTML = '';
 
+            // FIX: Deduplicate all-time history counts so duplicates in the sheet won't bloat the Corpus calculations
             Object.keys(records).forEach(m => {
                 Object.keys(records[m]).forEach(f => {
                     if (records[m][f] === true) {
@@ -422,16 +420,14 @@
             const amt = parseFloat(document.getElementById('expAmt').value);
 
             if (!desc || isNaN(amt) || amt <= 0) {
-                alert("Please write a valid description and a positive numerical amount.");
+                alert("Please write a valid description.");
                 return;
             }
 
             expenses.push({ id: Date.now(), description: desc, amount: amt });
             localStorage.setItem('tivon_park_expenses', JSON.stringify(expenses));
-            
             document.getElementById('expDesc').value = '';
             document.getElementById('expAmt').value = '';
-            
             initApp();
         }
 
@@ -479,9 +475,7 @@
                 mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
-            }).then(() => {
-                setTimeout(fetchMasterRecords, 1000);
-            }).catch(err => console.log("Cloud pipeline delay/deferred: ", err));
+            }).catch(err => console.log("Network buffer: ", err));
         }
     </script>
 </body>
