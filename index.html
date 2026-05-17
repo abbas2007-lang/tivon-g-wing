@@ -48,8 +48,10 @@
                         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest" id="roleBadge">G-Wing Dashboard</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <select id="monthSelect" onchange="changeMonth()" class="bg-gray-100 border rounded-lg px-3 py-1.5 font-semibold text-gray-700 focus:outline-none text-sm">
+                <div class="flex items-center space-x-3">
+                    <button onclick="fetchMasterRecords()" class="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition" id="syncBtn">🔄 Sync Cloud Data</button>
+                    
+                    <select id="monthSelect" onchange="changeMonth()" class="bg-gray-100 border rounded-lg px-2.5 py-1.5 font-semibold text-gray-700 focus:outline-none text-sm">
                         <option value="January 2026">January 2026</option>
                         <option value="February 2026">February 2026</option>
                         <option value="March 2026">March 2026</option>
@@ -63,7 +65,7 @@
                         <option value="November 2026">November 2026</option>
                         <option value="December 2026">December 2026</option>
                     </select>
-                    <button onclick="exitToGateway()" class="text-gray-400 hover:text-red-500 text-sm font-medium">Exit</button>
+                    <button onclick="exitToGateway()" class="text-gray-400 hover:text-red-500 text-sm font-medium pl-1">Exit</button>
                 </div>
             </div>
         </header>
@@ -112,7 +114,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Expense Description</label>
-                        <input type="text" id="expDesc" placeholder="e.g. Lift Repair, Water Tank Cleaning" class="w-full text-sm p-2 border rounded-lg focus:outline-none">
+                        <input type="text" id="expDesc" placeholder="e.g. Lift Repair" class="w-full text-sm p-2 border rounded-lg focus:outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Amount Paid (INR)</label>
@@ -167,17 +169,14 @@
     </div>
 
     <script>
-        // Set master validation passkey
         const APP_PASSWORD = "G123"; 
         
-        // PASTE YOUR GOOGLE WEB APP MACRO ENDPOINT LINK URL DIRECTLY BETWEEN THE QUOTES BELOW:
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzj48ODAOj0dRsdrqqaV5-q2VfLs2HEWUAQFwiTKD_2vXU6aTdwi8pixRndtt07dXcjQ/exec";
+        // PASTE YOUR FRESH DEPLOYED WEB APP URL HERE:
+        const GOOGLE_SCRIPT_URL = "";
 
-        // Application Internal State Core Variables
         let currentMonth = "May 2026";
         let isAdmin = false;
 
-        // Local Storage Synchronized System Schemas
         let records = JSON.parse(localStorage.getItem('tivon_park_records')) || {};
         let expenses = JSON.parse(localStorage.getItem('tivon_park_expenses')) || [];
 
@@ -203,7 +202,7 @@
             document.getElementById('roleBadge').innerText = "G-Wing Member View Only";
             document.getElementById('lockNotice').classList.remove('hidden');
             document.getElementById('expensesBlock').classList.add('hidden');
-            initApp();
+            fetchMasterRecords();
         }
 
         function checkPassword() {
@@ -215,13 +214,42 @@
                 document.getElementById('roleBadge').innerText = "G-Wing System Administrator";
                 document.getElementById('lockNotice').classList.add('hidden');
                 document.getElementById('expensesBlock').classList.remove('hidden');
-                
-                // Show admin components in tables
                 document.querySelectorAll('.adminOnly').forEach(el => el.classList.remove('invisible'));
-                initApp();
+                fetchMasterRecords();
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
             }
+        }
+
+        function fetchMasterRecords() {
+            if (GOOGLE_SCRIPT_URL === "") {
+                initApp();
+                return;
+            }
+            
+            const btn = document.getElementById('syncBtn');
+            btn.innerText = "⚡ Syncing...";
+            btn.disabled = true;
+
+            fetch(GOOGLE_SCRIPT_URL, { method: "GET" })
+                .then(response => response.json())
+                .then(cloudData => {
+                    records = {};
+                    cloudData.forEach(row => {
+                        if (!records[row.month]) records[row.month] = {};
+                        records[row.month][row.flatNumber] = (row.status === "PAID");
+                    });
+                    localStorage.setItem('tivon_park_records', JSON.stringify(records));
+                    initApp();
+                    btn.innerText = "✅ Cloud Synced";
+                    setTimeout(() => { btn.innerText = "🔄 Sync Cloud Data"; btn.disabled = false; }, 2000);
+                })
+                .catch(err => {
+                    console.log("Error loading remote sheet matrix: ", err);
+                    initApp();
+                    btn.innerText = "❌ Sync Failed";
+                    setTimeout(() => { btn.innerText = "🔄 Sync Cloud Data"; btn.disabled = false; }, 2000);
+                });
         }
 
         function exitToGateway() {
@@ -271,7 +299,6 @@
                     const btn = document.createElement('button');
                     btn.id = `btn-${flatId}`;
                     
-                    // Route interaction capability depending exclusively upon verified clearance status
                     if (isAdmin) {
                         btn.onclick = () => togglePayment(flatId, info.rate);
                         btn.style.cursor = "pointer";
@@ -320,7 +347,6 @@
             const tableBody = document.getElementById('reportTableBody');
             tableBody.innerHTML = '';
 
-            // Compute values dynamically parsing multi-month local state structures
             Object.keys(records).forEach(m => {
                 Object.keys(records[m]).forEach(f => {
                     if (records[m][f] === true) {
@@ -359,7 +385,6 @@
                 });
             });
 
-            // Calculate overall Society Corpus Account Health Balances
             let totalExpensesOutflow = expenses.reduce((sum, item) => sum + item.amount, 0);
             let calculatedCorpusNet = cumulativeAllTimeCollection - totalExpensesOutflow;
 
@@ -432,6 +457,8 @@
                 mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
+            }).then(() => {
+                setTimeout(fetchMasterRecords, 1000);
             }).catch(err => console.log("Cloud pipeline delay/deferred: ", err));
         }
     </script>
