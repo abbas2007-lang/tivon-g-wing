@@ -14,7 +14,7 @@
 </head>
 <body class="bg-gray-50 font-sans min-h-screen">
 
-    <div id="loginScreen" class="flex items-center justify-center min-h-screen p-4">
+    <div id="gatewayScreen" class="flex items-center justify-center min-h-screen p-4">
         <div class="bg-white p-8 rounded-2xl shadow-xl max-w-sm w-full text-center border-t-4 border-brand-purple">
             <div class="flex justify-center mb-4">
                 <div class="flex items-center space-x-3 text-left">
@@ -25,9 +25,15 @@
                     </div>
                 </div>
             </div>
-            <h2 class="text-lg font-bold text-gray-700 mb-6">G-Wing Maintenance System</h2>
-            <input type="password" id="passwordInput" placeholder="Enter Manager Password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#78246c] mb-4 text-center">
-            <button onclick="checkPassword()" class="w-full bg-brand-purple text-white py-2 rounded-lg font-semibold hover:bg-opacity-90 transition">Login</button>
+            <h2 class="text-lg font-bold text-gray-700 mb-2">G-Wing Maintenance Hub</h2>
+            <p class="text-xs text-gray-400 mb-6">Choose an access level below to proceed</p>
+            
+            <div class="space-y-3">
+                <button onclick="enterAsViewer()" class="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-xl font-bold transition flex items-center justify-center gap-2">👁️ View Society Dashboard</button>
+                <div class="border-b my-2 border-gray-100"></div>
+                <input type="password" id="passwordInput" placeholder="Enter Admin Password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#78246c] text-center text-sm">
+                <button onclick="checkPassword()" class="w-full bg-brand-purple text-white py-2.5 rounded-lg font-semibold hover:bg-opacity-90 transition shadow-xs">Manager Login 🔑</button>
+            </div>
             <p id="loginError" class="text-red-500 text-sm mt-2 hidden">Invalid Password. Try again.</p>
         </div>
     </div>
@@ -39,11 +45,11 @@
                     <span class="text-2xl">🌳</span>
                     <div>
                         <h1 class="text-xl font-black brand-purple tracking-wide leading-none">TIVON PARK</h1>
-                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">G-Wing Admin</p>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest" id="roleBadge">G-Wing Dashboard</p>
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <select id="monthSelect" onchange="changeMonth()" class="bg-gray-100 border rounded-lg px-3 py-1.5 font-semibold text-gray-700 focus:outline-none">
+                    <select id="monthSelect" onchange="changeMonth()" class="bg-gray-100 border rounded-lg px-3 py-1.5 font-semibold text-gray-700 focus:outline-none text-sm">
                         <option value="January 2026">January 2026</option>
                         <option value="February 2026">February 2026</option>
                         <option value="March 2026">March 2026</option>
@@ -57,31 +63,35 @@
                         <option value="November 2026">November 2026</option>
                         <option value="December 2026">December 2026</option>
                     </select>
-                    <button onclick="logout()" class="text-gray-400 hover:text-red-500 text-sm">Logout</button>
+                    <button onclick="exitToGateway()" class="text-gray-400 hover:text-red-500 text-sm font-medium">Exit</button>
                 </div>
             </div>
         </header>
 
         <main class="max-w-6xl mx-auto p-4 space-y-6">
             
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div class="bg-white p-4 rounded-xl shadow-xs border-l-4 border-brand-purple">
-                    <p class="text-xs font-bold text-gray-400 uppercase">Total Collected (<span class="currentMonthLabel">May 2026</span>)</p>
-                    <p class="text-2xl font-bold brand-purple mt-1">INR <span id="totalCollected">0</span></p>
+                    <p class="text-xs font-bold text-gray-400 uppercase">Collected (<span class="currentMonthLabel">May 2026</span>)</p>
+                    <p class="text-xl font-bold brand-purple mt-1">INR <span id="totalCollected">0</span></p>
                 </div>
                 <div class="bg-white p-4 rounded-xl shadow-xs border-l-4 border-brand-green">
-                    <p class="text-xs font-bold text-gray-400 uppercase">Collection Progress</p>
-                    <p class="text-2xl font-bold text-gray-700 mt-1"><span id="paidCount">0</span> / 36 <span class="text-sm font-normal text-gray-400">Flats</span></p>
+                    <p class="text-xs font-bold text-gray-400 uppercase">Paid Units</p>
+                    <p class="text-xl font-bold text-gray-700 mt-1"><span id="paidCount">0</span> / 36 <span class="text-xs font-normal text-gray-400">Flats</span></p>
                 </div>
                 <div class="bg-white p-4 rounded-xl shadow-xs border-l-4 border-amber-500">
-                    <p class="text-xs font-bold text-gray-400 uppercase">Pending Outstanding</p>
-                    <p class="text-2xl font-bold text-amber-600 mt-1">INR <span id="totalPending">0</span></p>
+                    <p class="text-xs font-bold text-gray-400 uppercase">Pending (<span class="currentMonthLabel">May 2026</span>)</p>
+                    <p class="text-xl font-bold text-amber-600 mt-1">INR <span id="totalPending">0</span></p>
+                </div>
+                <div class="bg-gray-900 text-white p-4 rounded-xl shadow-xs border-l-4 border-emerald-400">
+                    <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider">🏦 Live Corpus Fund</p>
+                    <p class="text-xl font-bold text-white mt-1">INR <span id="corpusFund">0</span></p>
                 </div>
             </div>
 
             <div class="bg-white p-4 rounded-xl shadow-xs border">
-                <h3 class="font-bold text-gray-700 mb-2 flex items-center gap-2">⚙️ Rate Reference Profile (BHK Rules)</h3>
-                <div class="grid grid-cols-3 gap-2 text-xs md:text-sm text-center">
+                <h3 class="font-bold text-gray-700 mb-2 flex items-center gap-2 text-sm">⚙️ Rate Reference Profile (BHK Rules)</h3>
+                <div class="grid grid-cols-3 gap-2 text-xs text-center">
                     <div class="p-2 bg-purple-50 rounded text-purple-900 border border-purple-100"><strong>1 BHK:</strong> INR 2,950 <span class="block text-[10px] text-purple-600">(03 Series)</span></div>
                     <div class="p-2 bg-green-50 rounded text-green-900 border border-green-100"><strong>2 BHK:</strong> INR 4,800 <span class="block text-[10px] text-green-600">(02, 04 Series & G01)</span></div>
                     <div class="p-2 bg-blue-50 rounded text-blue-900 border border-blue-100"><strong>3 BHK:</strong> INR 5,980 <span class="block text-[10px] text-blue-600">(01 Series)</span></div>
@@ -89,49 +99,88 @@
             </div>
 
             <div class="space-y-4">
-                <h2 class="text-lg font-bold text-gray-800">Flat Management Matrix (<span class="currentMonthLabel">May 2026</span>)</h2>
-                
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-gray-800">Flat Status Map (<span class="currentMonthLabel">May 2026</span>)</h2>
+                    <span id="lockNotice" class="text-xs font-bold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-md border border-amber-200 hidden">🔒 Read-Only Mode Active</span>
+                </div>
                 <div id="floorsContainer" class="space-y-3">
                     </div>
             </div>
 
-            <div class="bg-white rounded-xl shadow-xs border p-4">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="font-bold text-gray-800">📋 Comprehensive Transaction Log Ledger</h3>
-                    <button onclick="window.print()" class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-md font-medium hover:bg-black transition">🖨️ Print Report</button>
+            <div id="expensesBlock" class="bg-white rounded-xl shadow-xs border p-4 hidden">
+                <h3 class="font-bold text-gray-800 mb-3 flex items-center gap-2">💸 Record Society Expense Entry</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Expense Description</label>
+                        <input type="text" id="expDesc" placeholder="e.g. Lift Repair, Water Tank Cleaning" class="w-full text-sm p-2 border rounded-lg focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1 uppercase">Amount Paid (INR)</label>
+                        <input type="number" id="expAmt" placeholder="e.g. 5000" class="w-full text-sm p-2 border rounded-lg focus:outline-none">
+                    </div>
+                    <button onclick="addExpense()" class="bg-brand-purple text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-opacity-90 transition h-10">Add Expense Line</button>
                 </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm text-gray-500">
-                        <thead class="bg-gray-100 text-gray-700 uppercase text-xs">
-                            <tr>
-                                <th class="p-3">Flat No</th>
-                                <th class="p-3">Config Type</th>
-                                <th class="p-3">Selected Month</th>
-                                <th class="p-3">Assigned Rate</th>
-                                <th class="p-3">Payment Status</th>
-                                <th class="p-3">Action History Logs</th>
-                            </tr>
-                        </thead>
-                        <tbody id="reportTableBody">
-                            </tbody>
-                    </table>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white rounded-xl shadow-xs border p-4 md:col-span-2">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-gray-800 text-sm">📋 Maintenance Transaction Ledger</h3>
+                        <button onclick="window.print()" class="text-xs bg-gray-800 text-white px-3 py-1.5 rounded-md font-medium hover:bg-black transition">🖨️ Print Dashboard</button>
+                    </div>
+                    <div class="overflow-y-auto max-h-96">
+                        <table class="w-full text-left text-xs text-gray-500">
+                            <thead class="bg-gray-100 text-gray-700 uppercase sticky top-0">
+                                <tr>
+                                    <th class="p-2.5">Flat No</th>
+                                    <th class="p-2.5">BHK</th>
+                                    <th class="p-2.5">Month</th>
+                                    <th class="p-2.5">Rate</th>
+                                    <th class="p-2.5">Status</th>
+                                    <th class="p-2.5 adminOnly invisible">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-xs border p-4">
+                    <h3 class="font-bold text-gray-800 text-sm mb-4">📉 Society Expense Outflows</h3>
+                    <div class="overflow-y-auto max-h-96">
+                        <table class="w-full text-left text-xs text-gray-500">
+                            <thead class="bg-gray-100 text-gray-700 uppercase">
+                                <tr>
+                                    <th class="p-2">Description</th>
+                                    <th class="p-2 text-right">Amount</th>
+                                    <th class="p-2 text-center adminOnly invisible">X</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expenseTableBody">
+                                </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        // Set your master app access credentials here
+        // Set master validation passkey
         const APP_PASSWORD = "G123"; 
         
-        // Optional: Replace this URL string with your published Google Apps Script Web App URL macro to enable full cloud backup pipelines!
+        // PASTE YOUR GOOGLE WEB APP MACRO ENDPOINT LINK URL DIRECTLY BETWEEN THE QUOTES BELOW:
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYz4d1fFG4Km2FO6fPfgW0sWU_pi9cySrjwqLHbn7HY7hpsQFjVudHXx-0W2KmSQ4MMw/exec";
 
-        // Application State Database Object Storage
+        // Application Internal State Core Variables
         let currentMonth = "May 2026";
-        let records = JSON.parse(localStorage.getItem('tivon_park_records')) || {};
+        let isAdmin = false;
 
-        // Flat definitions mapping matching user layout rulesets
+        // Local Storage Synchronized System Schemas
+        let records = JSON.parse(localStorage.getItem('tivon_park_records')) || {};
+        let expenses = JSON.parse(localStorage.getItem('tivon_park_expenses')) || [];
+
         const seriesConfig = {
             '01': { bhk: '3 BHK', rate: 5980 },
             '02': { bhk: '2 BHK', rate: 4800 },
@@ -143,28 +192,41 @@
         const sequences = ['01', '02', '03', '04'];
 
         function getFlatDetails(flatId) {
-            // Exceptional catch checking condition rule: G01 is uniquely structured as 2BHK
-            if (flatId === 'G01') {
-                return { bhk: '2 BHK', rate: 4800 };
-            }
-            const series = flatId.slice(-2);
-            return seriesConfig[series];
+            if (flatId === 'G01') return { bhk: '2 BHK', rate: 4800 };
+            return seriesConfig[flatId.slice(-2)];
+        }
+
+        function enterAsViewer() {
+            isAdmin = false;
+            document.getElementById('gatewayScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('roleBadge').innerText = "G-Wing Member View Only";
+            document.getElementById('lockNotice').classList.remove('hidden');
+            document.getElementById('expensesBlock').classList.add('hidden');
+            initApp();
         }
 
         function checkPassword() {
             const pass = document.getElementById('passwordInput').value;
             if (pass === APP_PASSWORD) {
-                document.getElementById('loginScreen').classList.add('hidden');
+                isAdmin = true;
+                document.getElementById('gatewayScreen').classList.add('hidden');
                 document.getElementById('mainApp').classList.remove('hidden');
+                document.getElementById('roleBadge').innerText = "G-Wing System Administrator";
+                document.getElementById('lockNotice').classList.add('hidden');
+                document.getElementById('expensesBlock').classList.remove('hidden');
+                
+                // Show admin components in tables
+                document.querySelectorAll('.adminOnly').forEach(el => el.classList.remove('invisible'));
                 initApp();
             } else {
                 document.getElementById('loginError').classList.remove('hidden');
             }
         }
 
-        function logout() {
+        function exitToGateway() {
             document.getElementById('passwordInput').value = '';
-            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('gatewayScreen').classList.remove('hidden');
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('loginError').classList.add('hidden');
         }
@@ -173,6 +235,7 @@
             updateLabels();
             renderGrids();
             calculateMetrics();
+            renderExpenses();
         }
 
         function updateLabels() {
@@ -207,16 +270,22 @@
 
                     const btn = document.createElement('button');
                     btn.id = `btn-${flatId}`;
-                    btn.onclick = () => togglePayment(flatId, info.rate);
+                    
+                    // Route interaction capability depending exclusively upon verified clearance status
+                    if (isAdmin) {
+                        btn.onclick = () => togglePayment(flatId, info.rate);
+                        btn.style.cursor = "pointer";
+                    } else {
+                        btn.style.cursor = "not-allowed";
+                    }
                     
                     if (isPaid) {
-                        btn.className = "p-3 rounded-lg text-left bg-green-500 text-white shadow-xs transition duration-200 flex flex-col justify-between h-20 border border-green-600";
+                        btn.className = "p-3 rounded-lg text-left bg-green-500 text-white shadow-xs flex flex-col justify-between h-20 border border-green-600";
                         btn.innerHTML = `<div><span class="font-black text-lg">${flatId}</span> <span class="text-[10px] bg-white text-green-600 px-1.5 rounded-full font-bold ml-1">${info.bhk}</span></div><div class="text-xs font-semibold tracking-wider flex items-center justify-between w-full"><span>₹${info.rate}</span> <span class="bg-white/20 px-2 py-0.5 rounded text-[10px]">✓ PAID</span></div>`;
                     } else {
-                        btn.className = "p-3 rounded-lg text-left bg-white text-gray-700 hover:bg-gray-50 border border-gray-200 transition duration-200 flex flex-col justify-between h-20 shadow-2xs";
+                        btn.className = "p-3 rounded-lg text-left bg-white text-gray-700 border border-gray-200 flex flex-col justify-between h-20 shadow-2xs";
                         btn.innerHTML = `<div><span class="font-black text-lg text-gray-800">${flatId}</span> <span class="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded-full font-semibold ml-1">${info.bhk}</span></div><div class="text-xs font-bold text-gray-500 tracking-wider flex items-center justify-between w-full"><span>₹${info.rate}</span> <span class="text-red-500 text-[10px]">● UNPAID</span></div>`;
                     }
-
                     gridDiv.appendChild(btn);
                 });
 
@@ -226,9 +295,8 @@
         }
 
         function togglePayment(flatId, rate) {
-            if (!records[currentMonth]) {
-                records[currentMonth] = {};
-            }
+            if (!isAdmin) return;
+            if (!records[currentMonth]) records[currentMonth] = {};
 
             const currentStatus = records[currentMonth][flatId];
             const newStatus = !currentStatus;
@@ -238,18 +306,29 @@
             
             initApp();
 
-            // Cloud Data Transmission Hub Pipeline Execution
             if (newStatus && GOOGLE_SCRIPT_URL !== "") {
                 sendToGoogleSheets(flatId, rate, "PAID");
             }
         }
 
         function calculateMetrics() {
-            let totalCollected = 0;
-            let totalPending = 0;
+            let currentMonthCollected = 0;
+            let currentMonthPending = 0;
             let paidCount = 0;
+            let cumulativeAllTimeCollection = 0;
+
             const tableBody = document.getElementById('reportTableBody');
             tableBody.innerHTML = '';
+
+            // Compute values dynamically parsing multi-month local state structures
+            Object.keys(records).forEach(m => {
+                Object.keys(records[m]).forEach(f => {
+                    if (records[m][f] === true) {
+                        const inf = getFlatDetails(f);
+                        cumulativeAllTimeCollection += inf.rate;
+                    }
+                });
+            });
 
             floors.forEach(floor => {
                 sequences.forEach(seq => {
@@ -258,38 +337,85 @@
                     const isPaid = records[currentMonth]?.[flatId] || false;
 
                     if (isPaid) {
-                        totalCollected += info.rate;
+                        currentMonthCollected += info.rate;
                         paidCount++;
                     } else {
-                        totalPending += info.rate;
+                        currentMonthPending += info.rate;
                     }
 
-                    // Render rows into tabular display engine ledger
                     const row = document.createElement('tr');
                     row.className = "border-b hover:bg-gray-50";
                     row.innerHTML = `
-                        <td class="p-3 font-bold text-gray-900">${flatId}</td>
-                        <td class="p-3 text-xs"><span class="px-2 py-1 rounded bg-gray-100 font-medium">${info.bhk}</span></td>
-                        <td class="p-3 text-xs font-semibold">${currentMonth}</td>
-                        <td class="p-3 font-mono font-medium text-gray-700">INR ${info.rate}</td>
-                        <td class="p-3 text-xs font-bold">
-                            <span class="${isPaid ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'} px-2 py-1 rounded-full">
-                                ${isPaid ? 'Received' : 'Pending Payment'}
-                            </span>
-                        </td>
-                        <td class="p-3">
-                            <button onclick="togglePayment('${flatId}', ${info.rate})" class="text-xs font-bold brand-purple hover:underline decoration-brand-purple">
-                                Flip State
-                            </button>
+                        <td class="p-2.5 font-bold text-gray-900">${flatId}</td>
+                        <td class="p-2.5 text-gray-500 font-medium">${info.bhk}</td>
+                        <td class="p-2.5 font-semibold text-gray-400">${currentMonth}</td>
+                        <td class="p-2.5 font-mono text-gray-600">₹${info.rate}</td>
+                        <td class="p-2.5 font-bold ${isPaid ? 'text-green-600' : 'text-red-500'}">${isPaid ? '✓ Paid' : '● Pending'}</td>
+                        <td class="p-2.5 adminOnly ${isAdmin ? '' : 'invisible'}">
+                            <button onclick="togglePayment('${flatId}', ${info.rate})" class="text-purple-700 font-bold hover:underline">Flip</button>
                         </td>
                     `;
                     tableBody.appendChild(row);
                 });
             });
 
-            document.getElementById('totalCollected').innerText = totalCollected.toLocaleString('en-IN');
+            // Calculate overall Society Corpus Account Health Balances
+            let totalExpensesOutflow = expenses.reduce((sum, item) => sum + item.amount, 0);
+            let calculatedCorpusNet = cumulativeAllTimeCollection - totalExpensesOutflow;
+
+            document.getElementById('totalCollected').innerText = currentMonthCollected.toLocaleString('en-IN');
             document.getElementById('paidCount').innerText = paidCount;
-            document.getElementById('totalPending').innerText = totalPending.toLocaleString('en-IN');
+            document.getElementById('totalPending').innerText = currentMonthPending.toLocaleString('en-IN');
+            document.getElementById('corpusFund').innerText = calculatedCorpusNet.toLocaleString('en-IN');
+        }
+
+        function addExpense() {
+            if (!isAdmin) return;
+            const desc = document.getElementById('expDesc').value.trim();
+            const amt = parseFloat(document.getElementById('expAmt').value);
+
+            if (!desc || isNaN(amt) || amt <= 0) {
+                alert("Please write a valid description and a positive numerical amount.");
+                return;
+            }
+
+            expenses.push({ id: Date.now(), description: desc, amount: amt });
+            localStorage.setItem('tivon_park_expenses', JSON.stringify(expenses));
+            
+            document.getElementById('expDesc').value = '';
+            document.getElementById('expAmt').value = '';
+            
+            initApp();
+        }
+
+        function deleteExpense(id) {
+            if (!isAdmin) return;
+            expenses = expenses.filter(exp => exp.id !== id);
+            localStorage.setItem('tivon_park_expenses', JSON.stringify(expenses));
+            initApp();
+        }
+
+        function renderExpenses() {
+            const expBody = document.getElementById('expenseTableBody');
+            expBody.innerHTML = '';
+
+            if (expenses.length === 0) {
+                expBody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-gray-400 italic">No expenses logged yet</td></tr>`;
+                return;
+            }
+
+            expenses.forEach(exp => {
+                const row = document.createElement('tr');
+                row.className = "border-b text-xs hover:bg-gray-50";
+                row.innerHTML = `
+                    <td class="p-2 font-medium text-gray-700">${exp.description}</td>
+                    <td class="p-2 font-mono text-right text-red-600 font-bold">₹${exp.amount.toLocaleString('en-IN')}</td>
+                    <td class="p-2 text-center adminOnly ${isAdmin ? '' : 'invisible'}">
+                        <button onclick="deleteExpense(${exp.id})" class="text-red-400 hover:text-red-700 font-bold">🗑️</button>
+                    </td>
+                `;
+                expBody.appendChild(row);
+            });
         }
 
         function sendToGoogleSheets(flat, amount, status) {
@@ -301,13 +427,12 @@
                 paymentStatus: status
             };
 
-            // Non-blocking fetch deployment targeting remote script endpoint handling transaction parsing
             fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
                 mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
-            }).catch(err => console.log("Cloud push deferred or offline: ", err));
+            }).catch(err => console.log("Cloud pipeline delay/deferred: ", err));
         }
     </script>
 </body>
